@@ -3,23 +3,28 @@
 namespace Illuminate\Support;
 
 use Closure;
-use Egulias\EmailValidator\EmailValidator;
-use Egulias\EmailValidator\Validation\RFCValidation;
-use Illuminate\Support\Traits\Macroable;
-use JsonException;
-use League\CommonMark\Environment\Environment;
-use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
-use League\CommonMark\Extension\InlinesOnly\InlinesOnlyExtension;
-use League\CommonMark\GithubFlavoredMarkdownConverter;
-use League\CommonMark\MarkdownConverter;
-use Ramsey\Uuid\Codec\TimestampFirstCombCodec;
-use Ramsey\Uuid\Generator\CombGenerator;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidFactory;
-use Symfony\Component\Uid\Ulid;
 use Throwable;
 use Traversable;
+use JsonException;
+use Ramsey\Uuid\Uuid;
 use voku\helper\ASCII;
+use Ramsey\Uuid\UuidFactory;
+use Symfony\Component\Uid\Ulid;
+use Illuminate\Support\Traits\Macroable;
+use League\CommonMark\MarkdownConverter;
+use Ramsey\Uuid\Generator\CombGenerator;
+use Egulias\EmailValidator\EmailValidator;
+use League\CommonMark\Environment\Environment;
+use Ramsey\Uuid\Codec\TimestampFirstCombCodec;
+use Illuminate\Validation\Rules\EmailValidation;
+use Egulias\EmailValidator\Validation\RFCValidation;
+use League\CommonMark\GithubFlavoredMarkdownConverter;
+use Egulias\EmailValidator\Validation\DNSCheckValidation;
+use Illuminate\Validation\Concerns\FilterEmailValidation;
+use Egulias\EmailValidator\Validation\NoRFCWarningsValidation;
+use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
+use Egulias\EmailValidator\Validation\Extra\SpoofCheckValidation;
+use League\CommonMark\Extension\InlinesOnly\InlinesOnlyExtension;
 
 class Str
 {
@@ -2019,12 +2024,13 @@ class Str
      * @param  mixed  $value
      * @return bool
      */
-    public static function isEmail(string $value): bool
+   public static function isEmail(string $value, ?EmailValidation $rule = null): bool
     {
         $validator = new EmailValidator();
-
-        return $validator->isValid($value, new RFCValidation());
+        $validationRule = $rule?->validation() ?? new RFCValidation();
+        return $validator->isValid($value, $validationRule);
     }
+
 
     /**
      * Remove all strings from the casing caches.
@@ -2038,3 +2044,5 @@ class Str
         static::$studlyCache = [];
     }
 }
+
+
